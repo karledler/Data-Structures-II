@@ -1,0 +1,238 @@
+import java.io.*;
+import java.text.*;
+import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.Timer;
+import javax.swing.event.*;
+import javax.swing.text.*;
+import javax.swing.border.*;
+import java.util.Random;
+import java.net.*;
+import javax.swing.JComponent.*;
+
+//****************************************************************************
+
+// Class that controls the user input. Buttons allow users access to help, 
+//to enter a bid and display current status, restart the auction.  The exit button 
+//writes  the stack of bidders to a file
+//****************************************************************************
+public class ControlsPanel extends JPanel
+{
+  private JButton startButton, exitButton, enterButton, helpButton , statusButton;
+  private ActionHandler action;
+  private int count, ID;
+  Bidder bd;
+  BidderPanel BP;
+  JTextField BiddersField, CurrentField, MaxField, NewField, NewMaxField;	
+  AuctionGUI ag;
+  int Bidders=0;
+  
+
+  
+// declare objects (DO NOT INSTANTIATE HERE) e.g Bidder, buttonlistener,and BidderPanel -  
+  //class where the bidders  are drawn
+	
+	// Also keep a count of the number of bidders
+    // When you create a bidder,  give it a unique id number as the bidders name.  The equals method
+	 // in the Bidder class should compare two bidders based on their id	number. The compareto should compare based on
+	 //maxbid
+ 
+   	// declare an object of the ArrayStack class
+	
+   public ControlsPanel(JTextField BiddersField, JTextField CurrentField, JTextField MaxField, JTextField NewField, JTextField NewMaxField, BidderPanel BP, AuctionGUI ag)
+	{
+	  // assign all the parameters to above declared instance variable e.g
+	    
+      this.ag= ag;
+      this.bd = bd;
+      this.BP= BP;
+		this.BiddersField= BiddersField;
+      this.CurrentField= CurrentField;
+      this.MaxField= MaxField; 	  
+	   this.NewField= NewField;
+      this.NewMaxField= NewMaxField;
+       		 	  
+       action = new ActionHandler();
+      
+       startButton = new JButton("Start");
+		 exitButton = new JButton("Exit");
+		 statusButton = new JButton("Status");
+		 helpButton = new JButton("Help");
+     	 enterButton = new JButton("Enter Bid");
+       
+       startButton.setToolTipText("");
+		 startButton.setMargin(new Insets(5,5,10,5));// sets margins around the string ""
+		 startButton.addActionListener(new ActionHandler()); // attaches a listener to this button
+
+	    exitButton.setToolTipText("");
+		 exitButton.setMargin(new Insets(5,5,10,5));// sets margins around the string "" 
+		 exitButton.addActionListener(new ActionHandler()); // attaches a listener to this button
+
+		 statusButton.setToolTipText("");
+		 statusButton.setMargin(new Insets(5,5,10,5));// sets margins around the string ""
+		 statusButton.addActionListener(new ActionHandler()); // attaches a listener to this button
+
+		 helpButton.setToolTipText("Auction Instructions");
+		 helpButton.setMargin(new Insets(5,5,10,5));// sets margins around the string "Help"
+		 helpButton.addActionListener(new ActionHandler()); // attaches a listener to this button
+       
+       enterButton.setToolTipText("Enter your bid");
+		 enterButton.setMargin(new Insets(5,5,10,5));// sets margins around the string ""
+		 enterButton.addActionListener(new ActionHandler()); // attaches a listener to this button
+       
+      setBorder(BorderFactory.createLoweredBevelBorder());
+      add(enterButton);
+      add(exitButton);
+      add(statusButton);
+      add(helpButton);
+
+	// create all the buttons and add the listener  - get code from DatingService
+	
+	// buttons should include EnterBid, Help, Exit, Restart (restart auction), Status
+   // For Status button you can use a JOptionPane or a textarea that you would put on the top panel to 
+	  // report current status
+
+	//(optional) if  the user wants to restart, call a method to clear the textfields
+			// and reset the stack
+
+	//(optional) -	call method ReadBid to read  in the first bid and put it in the JTextfields
+  // add the buttons to this panel	
+  
+  // Remember to add actionslisteners to all the Buttons	
+}
+
+// inner class that acts as listener for the buttons
+	class ActionHandler implements ActionListener
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+		  // if a  bid is entered(AddBid button pressed) call a method in this class that
+	 	  //	processes the bid and adds it to the stack if qualified
+				// use  method  declared here in this class  -  addToStack() - to do the work
+					
+			// deal with other buttons
+         if (e.getActionCommand().equals("Enter Bid"))
+            {
+            addToStack();		
+            Bidders++;
+            }
+			// deal with other buttons
+						
+		   if (e.getActionCommand().equals("Status"))
+			{
+         String message=("There are "+Integer.toString(Bidders)+" bidder(s) \n");
+         Bidder bidder;
+         for (int x=0; x<Integer.parseInt(ag.getBidders()); x++)
+         {
+         bidder= BP.bidderStack.pop();
+         message+= (bidder.toString()+"\n");
+         }
+			JOptionPane.showMessageDialog (null,  message, "STATUS", JOptionPane.PLAIN_MESSAGE );
+			}
+         
+							
+			if(e.getActionCommand().equals("Exit"))
+			{
+			   writeCurrentStateToFile();// write out the stack of bidders 
+				System.exit(0);
+			}
+			
+			
+         if(e.getActionCommand().equals("Help"))
+			{
+			JOptionPane.showMessageDialog (null, "- To set your first bid, enter your amount into the field on the top right then click \"Enter Bid\".\n" +
+ 				"- To see the status of bidders, click the \"Status\" button.\n" +
+ 				"- To quit the Auction entirely and leave the program, click the \"Exit\" button.",   
+           "INSTRUCTIONS", JOptionPane.PLAIN_MESSAGE );
+			}
+
+
+
+			// other buttons
+								
+		}//close actionPerformed
+
+	}//close ButtonHandler
+	
+	// This method - called when a bid is to be processed (EnterBid is pressed)  gets the new bids, converts them from a String to a Double, use:
+	//	Double.parseDouble(amount) method from the Double class. It also creates a bidder each of 
+	// whom should have a unique number and bid amount. max bidamount etc. This method processes the new bid
+	
+		public void addToStack()
+   	{		
+		
+      double newBid, newMaxBid;
+      String bidders;
+      int intBidders;
+      
+      do
+      {	 
+		newBid= Double.parseDouble(ag.returnNewBid());
+      newMaxBid= Double.parseDouble(ag.returnNewMax());// call getter methods in TextPanel to return the new bid and the new max bid
+	      if (newBid>=newMaxBid)
+         {
+            JOptionPane.showMessageDialog (null,  "Max bid must be greater than your regular bid",   
+            "ERROR", JOptionPane.PLAIN_MESSAGE );
+         } 
+         if (newBid<Double.parseDouble(ag.returnCurrentMax()))
+         {
+            JOptionPane.showMessageDialog (null,  "New bid must be greater than the previous max bid",   
+            "ERROR", JOptionPane.PLAIN_MESSAGE );
+         }
+      } while ((newMaxBid<newBid) || (newBid<Double.parseDouble(ag.returnCurrentMax())) ); 	  
+	   
+      // create a bidder - you can store a list of all bidders in a stack 
+	  	
+      Bidder bidder= new Bidder(newBid, newMaxBid);
+      
+      BP.bidderStack.push(bidder); 
+	  	// process the bid  - if the bid is taken this includes calling a method 
+		//in the BidderPanel class called AddBid() that will draw the image..
+		// YOu will use the BidderPanel object sent to the constructor to do this.
+		// store the accepted bid in the stack.		
+		BP.addBid();
+      
+      // set the appropriate textfields
+      bidders= (ag.getBidders());
+      intBidders= (Integer.parseInt(bidders)+1);
+      bidders=	Integer.toString(intBidders);		  
+      ag.setBidders(bidders);
+      
+      ag.setCurrentBid(Double.toString(newBid));
+      ag.setCurrentMax(Double.toString(newMaxBid));
+      ag.setNewBid(null);
+      ag.setNewMax(null);
+      
+	
+  }
+
+
+// This method will write the bidders to a file
+public  void writeCurrentStateToFile()
+	{	 	
+			try
+			{ FileWriter fw = new FileWriter("Out.text");
+			  PrintWriter outFile = new PrintWriter(new BufferedWriter(fw));
+
+			 	//set up header with tabs
+				outFile.println("TIME       # of Bidders\tCurrent Bid\tCurrent Max Bid");
+				
+				// write out the stack of bids
+		
+			outFile.close();
+			}
+			catch (SecurityException e) {
+	       System.out.println("writeFile: caught security exception");
+        }
+	      
+			catch(IOException ex)
+			{
+				JOptionPane.showMessageDialog(null,ex.getMessage(),"Error",JOptionPane.PLAIN_MESSAGE);
+				
+			}
+	}		
+		
+	
+}
