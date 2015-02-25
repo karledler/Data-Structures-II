@@ -1,0 +1,391 @@
+
+
+//program to set up a client database using a List class
+   import java.util.StringTokenizer;
+   import java.io.*;
+   import java.text.*;
+   import java.util.*;
+   import java.awt.*;
+   import java.awt.event.*;
+   import javax.swing.*;
+	import java.util.ArrayList;
+	import java.util.Iterator;
+
+/********************************************************************
+* class DatingServiceGUI
+********************************************************************/
+public class DatingServiceGUI extends JFrame
+{
+		 private JList jList; //jList for displaying clients
+		 private DefaultListModel listModel; // List with a vector	
+
+		 // Declare JButtons
+			 private JButton addButton, deleteButton, findButton, helpButton;
+
+			 // Declare all the labels for TextFields and ComboBoxes
+		 private JLabel firstLabel, lastLabel, phoneLabel, hobbyLabel, ageLabel, statusLabel, genderLabel;
+
+		 // Declare TextFields
+		 private JTextField firstField, lastField, phoneField, hobbyField, ageField;
+
+		 // Declare ComboBoxes
+		 private JComboBox statusBox, genderBox;
+
+		 // Declare TextArea for find output
+		 private JTextArea outputArea;
+
+		 // Declare ActionHandler for button presses
+		 private ActionHandler action;
+
+		 // Declare an ArrayList to hold clients
+		 private ArrayList<Client> list = new ArrayList<Client>();
+
+
+/********************************************************************
+* DatingService::DatingServiceGUI()
+* setup GUI and load database file
+******************************************************************/
+public DatingServiceGUI()
+{
+  super("Dating Service"); // Set title
+
+		 //Setup JList
+		 listModel = new DefaultListModel(); 
+		 jList = new JList(listModel);
+
+		 // allows only one item to be selected at a time
+		 jList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	
+		 jList.setSelectedIndex(-1);// make initial screen empty
+
+		 // put the JList in a scrollpane for when Clients cannot be seen in the JList
+		 JScrollPane listScrollPane = new JScrollPane(jList);
+
+		 // set up a compound border for the Jlist object 
+		 listScrollPane.setBorder(
+			BorderFactory.createCompoundBorder(
+			BorderFactory.createCompoundBorder(
+			BorderFactory.createLineBorder(Color.cyan),
+			BorderFactory.createLoweredBevelBorder()),
+			BorderFactory.createCompoundBorder(
+			BorderFactory.createLineBorder(Color.gray),
+			BorderFactory.createLoweredBevelBorder())));
+
+		 // call BuildService to initialize the client list
+		 BuildService();
+
+	     // create a JTextArea to output search results
+		 outputArea = new JTextArea("Results",40,30);
+		 outputArea.setEditable(false);
+ 		 outputArea.setBackground(Color.white);
+ 		 
+ 		 // create a JPanel for the outputArea
+	   	 JPanel outputPanel = new JPanel();
+		 outputPanel.add(outputArea);
+		 outputPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+
+		 // create an ActionHandler
+		 action = new ActionHandler();
+
+		 // set up all the buttons 
+		 addButton = new JButton("Add");
+		 deleteButton = new JButton("Delete");
+		 findButton = new JButton("Find");
+		 helpButton = new JButton("Help");
+
+		 // Set tooltips and add action listeners to each
+		 addButton.setToolTipText("Adds a client to the database after fields are filled");
+		 addButton.setMargin(new Insets(5,5,10,5));// sets margins around the string "Add"
+		 addButton.addActionListener(action); // attaches a listener to this button
+
+	     deleteButton.setToolTipText("Remove a client from the database");
+		 deleteButton.setMargin(new Insets(5,5,10,5));// sets margins around the string "Delete" 
+		 deleteButton.addActionListener(action); // attaches a listener to this button
+
+		 findButton.setToolTipText("Find a client in the database");
+		 findButton.setMargin(new Insets(5,5,10,5));// sets margins around the string "Find"
+		 findButton.addActionListener(action); // attaches a listener to this button
+
+		 helpButton.setToolTipText("Get help with using the Dating Service");
+		 helpButton.setMargin(new Insets(5,5,10,5));// sets margins around the string "Help"
+		 helpButton.addActionListener(action); // attaches a listener to this button
+
+		 //create the panel to put the buttons on
+		 JPanel buttonPanel = new JPanel();
+		 buttonPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+
+		 // add the  buttons to the panel - buttonPanel
+		 buttonPanel.add(addButton);
+		 buttonPanel.add(deleteButton);
+		 buttonPanel.add(findButton);
+		 buttonPanel.add(helpButton);
+
+
+		 // create the JTextfields- example below
+		 firstField = new JTextField(16);
+		 lastField = new JTextField(16);
+		 phoneField = new JTextField(13);
+		 hobbyField = new JTextField(25);
+       ageField = new JTextField(17);
+
+		 // create comboBoxes status, and gender
+
+        
+		   statusBox = new JComboBox();
+         statusBox.addItem("Regular");
+         statusBox.addItem("Senior");
+         statusBox.setBackground(Color.white);
+         statusBox.addActionListener(action);
+        
+         genderBox = new JComboBox();
+         genderBox.addItem("Male");
+         genderBox.addItem("Female");
+         genderBox.setBackground(Color.white);
+         genderBox.addActionListener(action);
+         
+         // create a  label for each of the JTextFields and JComboBoxes
+	     firstLabel = new JLabel("First Name"); // this label is for the JButton ADD
+	     lastLabel = new JLabel("Last Name");
+	     phoneLabel = new JLabel("Phone Number");
+	     hobbyLabel = new JLabel("Hobby");
+	     ageLabel = new JLabel("Age");
+	     statusLabel = new JLabel("Client Type");
+	     genderLabel = new JLabel("Gender");
+
+           
+	     // create a panel for the labels
+	     JPanel labelPanel = new JPanel();
+	     labelPanel.setBorder(BorderFactory.createLoweredBevelBorder());// 4 is the width of line
+	     labelPanel.add(firstLabel);
+	     labelPanel.add(lastLabel);
+	     labelPanel.add(phoneLabel);
+	     labelPanel.add(hobbyLabel);
+	     labelPanel.add(ageLabel);
+	     labelPanel.add(statusLabel);
+	     labelPanel.add(genderLabel);
+	     labelPanel.setLayout(new GridLayout(7,0,5,5));// where labelPanel is the panel for the labels
+
+	     // create a panel for the client fields
+	     JPanel fieldPanel = new JPanel();
+	     fieldPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+	     fieldPanel.add(firstField);
+	     fieldPanel.add(lastField);
+	     fieldPanel.add(phoneField);
+	     fieldPanel.add(hobbyField);
+	     fieldPanel.add(ageField);
+	     fieldPanel.add(statusBox);
+	     fieldPanel.add(genderBox);
+	     fieldPanel.setLayout(new GridLayout(7,0,5,5));
+
+         // get the ContentPane and add the various panels
+	     Container c = getContentPane();
+	     c.add(listScrollPane, BorderLayout.NORTH);
+	     c.add(labelPanel, BorderLayout.WEST);
+	     c.add(fieldPanel, BorderLayout.CENTER);
+	     c.add(outputPanel, BorderLayout.EAST);
+	     c.add(buttonPanel, BorderLayout.SOUTH);
+
+    }  // close constructor
+
+// Method to populate the client list with clients read in from a file
+   public void BuildService()
+   {
+   	 // declare a client object 
+   	 Client client;
+   	 
+   	 // declare a File object to read from
+	 File file = new File("Client.dat");
+
+	 // declare strings and int for client data
+     String lastname  = " ", firstname  = " ", phone  = " ", hobby  = "", gender  = " ",status  = " ";
+     int age;
+     
+     //declare a string to hold the input from the Scanner
+     String line;
+     
+     try {
+    	 
+    	 // create a scanner to read in clients from a file "Client.dat"
+    	 Scanner scan = new Scanner(file);
+    	 // create another scanner to break up the line read in
+		 Scanner linescan;
+
+		 // this reads in lines from a file until there are no more (no hasNext())
+         while(scan.hasNext()) 
+         {
+        	 // reads in one line from the file
+        	 line = scan.nextLine();
+
+        	 // create a scanner object for the individual line
+        	 linescan = new Scanner(line);
+
+        	 // the line read in has more fields/tokens
+			 if(linescan.hasNext())
+			 {
+
+                 // use next and nextInt method to tokenize the line
+				 status = linescan.next();  
+				 firstname = linescan.next();
+				 lastname = linescan.next();
+				 gender = linescan.next();
+				 phone = linescan.next();
+				 hobby = linescan.next();
+
+				 // create a client from the tokenized input file
+				 if(status.charAt(0) == 'R'){
+					 age = linescan.nextInt();
+					 client = new Client(lastname,firstname,gender,age,phone,hobby);
+				 } 
+				 else
+					 client = new SeniorClient(lastname,firstname,gender,phone,hobby);
+
+				 // add the newly created client to the JList(listModel)
+				 listModel.addElement(client); 
+				 list.add(client);					               
+			 }
+         }
+	 } 
+     catch(FileNotFoundException e)
+     {
+    	 System.out.println("File Not Found") ; // !!FILE_NOT_FOUND
+     }     
+   }
+   
+
+/********************************************************************
+*class ActionHandler handles events from the buttons it is nested inside DatingService
+*The actionPerformed method is called when the buttons are pushed	 
+	************************************************************/
+   class ActionHandler implements ActionListener
+   {
+	   // declare a File object for reading/writing
+	   File file = new File("Client.dat");
+
+	   // declare a Client
+	   Client client;
+
+	   //executes when a button is pressed
+	   public void actionPerformed(ActionEvent e) 
+       {
+		   // declare strings and int for client data
+		   String lastname  = " ", firstname  = " ", phone  = " ", hobby  = "", gender  = " ",status  = " ", data;
+		   int age;
+
+
+           if (e.getActionCommand().equals("Help")) // help button pressed
+           JOptionPane.showMessageDialog (null, "Enter data in all the fields and then press add \n",   
+           "INSTRUCTIONS", JOptionPane.PLAIN_MESSAGE );
+        
+           if (e.getActionCommand().equals("Add")) // add button pressed
+           {   
+        	   // get data from textfields and comboboxes
+        	   firstname = firstField.getText();   
+			   lastname = lastField.getText();
+			   phone = phoneField.getText();
+			   hobby = hobbyField.getText();
+			   age = Integer.parseInt(ageField.getText());
+			   gender = (String)genderBox.getSelectedItem();
+            status = (String)statusBox.getSelectedItem();
+
+			   // fix gender output
+			   if(gender.equals("Male"))
+				  gender = "M";
+			   else
+				  gender = "F";
+
+               if(status.equalsIgnoreCase("Regular")) // If its a regular client...
+               {
+            	   // create a new client
+            	   client = new Client(lastname,firstname,gender,age,phone,hobby);
+            	   // add the client to the JList
+            	   listModel.addElement(client);
+            	   // add the client to the ArrayList
+				   list.add(client);
+				   data=status + " " + firstname + " " + lastname + " " + gender + " " + phone + " " + hobby + " " + age;
+               }
+               else
+               {
+            	   //create a senior client
+            	   client = new SeniorClient(lastname,firstname,gender,phone,hobby);
+            	   // add the client to the JList
+            	   listModel.addElement(client);
+            	   // add the client to the ArrayList
+            	   list.add(client);
+            	   data=status + " " + firstname + " " + lastname + " " + gender + " " + phone + " " + hobby;
+               }     
+              
+               
+               // reset all of the fields/boxes after adding
+               firstField.setText("");
+               lastField.setText("");
+               phoneField.setText("");
+               hobbyField.setText("");
+               ageField.setText("");
+               statusBox.setSelectedIndex(0);
+               genderBox.setSelectedIndex(0);
+           }
+
+         if (e.getActionCommand().equals("Delete")) // if the delete button was pressed
+			{
+				Client temp = (Client)jList.getSelectedValue();  // method returns an  client object  
+
+				// Removes client from the JList and ArrayList
+				listModel.removeElement(temp); 
+				list.remove(temp);
+
+			} 	// close if delete
+         
+
+           if (e.getActionCommand().equals("Find")) // find button pressed
+           {
+        	   int resultCount = 0; // keep track of the number of search results
+        	   Iterator<Client> iter = list.iterator(); // this returns an iterator to traverse the array
+        	   String response = ""; // string for the search results
+        	   outputArea.setText(""); // clear data from the JTextArea
+        	   Object[] findValues = {"Hobby","Age"};
+        	   String findSelection = "Hobby";
+        	   String choice = (String) JOptionPane.showInputDialog(null, "Find by Hobby or Age",
+                "Find", JOptionPane.QUESTION_MESSAGE, null, findValues, findSelection);
+        	   if(choice.equals("Hobby")){
+        		   String findHobby = 
+        			   JOptionPane.showInputDialog(null, "Enter Hobby:", "Enter Hobby", JOptionPane.PLAIN_MESSAGE);
+	        	   while (iter.hasNext()) 
+	               {
+	                   client = iter.next();// steps through the ArrayList client by Client
+	                   // if the hobbies match, increment the result counter and output the client
+	                   if(findHobby.equals(client.gethobby())){
+	                	   resultCount++;
+	                	   response += client.toString() + "\n\n";
+	                   }
+	               }
+	        	   // if there are no results, let the user know
+	        	   if(resultCount < 1)
+	        		   outputArea.append("No Reults Found");
+	        	   else{
+		        	   outputArea.append(response);
+		        	   resultCount = 0;
+	        	        }
+	           }
+        	   if(choice.equals("Age")){
+        		   String findAge = 
+        			   JOptionPane.showInputDialog(null, "Enter Age:", "Enter Age", JOptionPane.PLAIN_MESSAGE);
+	        	   while (iter.hasNext()) 
+	               {
+	                   client = iter.next();// steps through the ArrayList client by Client
+	                   int y = Integer.parseInt(findAge);
+	                   if(y>=((client.getage())-5)&&y<=((client.getage())+5)){
+	                	   resultCount++;
+	                	   response += client.toString() + "\n\n";
+	                   }
+	               }
+        	   
+    		   if(resultCount < 1)
+        		   outputArea.append("No Results Found");
+        	   else{
+        		   outputArea.append(response);
+        		   resultCount = 0;
+        	   }
+        	   }
+           }// close find
+       } // close actionperformed
+   } //close ActionHandler
+} // close class
