@@ -1,0 +1,308 @@
+/Design notes:  The checkerboard is an 8 x 8 
+//board with 5 red and 8 black pieces randomly 
+//placed on dark gray squares (so as to better 
+//see the black pieces).  The program will then
+//check to see if any black pieces can jump and
+//mark them with a white flag.  **Note: Black 
+//pieces move down the checkerboard**  This 
+//project implements interfaces, inheritance, 
+//and arrays.
+
+// You can use the suggestions I have here on how to place the squares and check for jumps or
+//do your own algorithm (preferred)
+
+import java.applet.Applet;
+import java.awt.*;
+import java.util.Random;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+
+//**********************************************
+
+
+public class Checkers extends JApplet
+{
+private final int MAX_SIZE = 8; 
+private final int APP_WIDTH = 400;
+private final int APP_HEIGHT = 400;
+private final int MAXSIZE = 8;
+Square[][]board = new Square[MAXSIZE][MAXSIZE];
+
+public void paint(Graphics page)
+	{
+	
+	setBackground(Color.white);
+	fillBoard(page); // draws the method that will draw the checkers
+   placeCheckers(page, 7, Color.red);   //method to place the red checkers
+   placeCheckers(page, 9, Color.black); //method to draw  black checkers
+   CheckJumps(page);	//check if checkers can jump	
+   setSize (APP_WIDTH,APP_HEIGHT);
+
+ }
+
+// stubs for start and stop
+public void start() {};// not implemented in this program
+public void stop() {};// not implemented in this program
+
+// This method creats a TWO D array and uses nested for loops to create the checkerboard
+ 
+ public void fillBoard(Graphics page)
+ {
+
+  
+       for (int x=0; x < board.length; x++)
+            {for(int y=0; y < board.length; y++)
+             if(x%2 == y%2)
+             {board[x][y]= new Square(50*x, 50*y, Color.blue);
+             board[x][y].draw(page);}
+             else
+             {board[x][y]= new Square(50*x, 50*y, Color.yellow);
+             board[x][y].draw(page);}
+            }         
+
+  
+}
+
+//Method to place checkers randomly 
+public void placeCheckers (Graphics page, int num_checkers, Color ncolor)
+	{
+	int count, col;
+   int row;
+	int x, y;
+	Circle c;
+   
+   for (count = 0; count < num_checkers; count++)
+   {
+      do{
+         row= (int)(Math.random() * MAXSIZE);
+         col= (int)(Math.random() * MAXSIZE);
+        }
+         while(board[row][col].getOccupy() || board[row][col].getColor()== Color.yellow);
+         
+         
+         
+         x = row * (APP_WIDTH/MAXSIZE);
+         y = col * (APP_HEIGHT/MAXSIZE);
+   
+         c = new Circle (x, y, 50, ncolor);
+   
+         c.draw(page);
+   
+        board[row][col].setOccupy(true);
+        
+         
+     }
+	 	}
+
+//********************************************************
+//Method to check for valid jumps and mark pieces
+//********************************************************
+public void CheckJumps (Graphics page)
+	{
+        for (int row = 0; row < 6; row++)
+            {for (int col = 0; col < board[row].length; col++)
+            { 
+                if ((col < 2) && board[row][col].getOccupy()==true && 
+                    (board[row][col].getColor() == Color.blue))
+                    CheckRightJump(page, row, col);
+                    if ((col > 1) && col < 6 && board[row][col].getOccupy()==true && 
+                    (board[row][col].getColor() == Color.blue))        
+                {
+                   CheckRightJump(page, row, col);
+                   
+                }  
+
+            }  }
+            
+            for(int row=2; row < 8; row++)
+               {for(int col = 0;col < 6;col++)    
+                     {if ((col > 5) && board[row][col].getOccupy()==true && 
+                    (board[row][col].getColor() == Color.blue))
+                    CheckLeftJump(page, row, col);
+                    if ((col > 1) && col < 6 && board[row][col].getOccupy()==true && 
+                    (board[row][col].getColor() == Color.blue))
+                    {CheckLeftJump(page, row, col);}
+               }}
+
+    
+    }
+ 
+//Checks  valid right-hand jumps
+public void CheckRightJump (Graphics page, int row, int col)
+    {
+        Circle c;
+        int x = row * (APP_WIDTH/MAXSIZE);
+        int y = col * (APP_HEIGHT/MAXSIZE);
+
+        if(board[row][col].getOccupy()==true)
+        {if (board[row+1][col+1].getOccupy()==true && 
+            (board[row+1][col+1].getColor() == Color.blue) && 
+            (board[row+2][col+2].getOccupy()==false))
+        {   
+            c = new Circle (x + 15, y + 15, 20, Color.white);
+            c.draw(page);  
+        }    }
+    }
+//Checks valid left-hand jumps
+public void CheckLeftJump (Graphics page, int row, int col)
+    {
+        Circle c;
+        int x = row * (APP_WIDTH/MAXSIZE);
+        int y = col * (APP_HEIGHT/MAXSIZE);
+       
+       if(board[row][col].getOccupy()==true)
+        {if (board[row-1][col+1].getOccupy()==true && 
+            (board[row-1][col+1].getColor() == Color.blue) && 
+            (board[row-2][col+2].getOccupy()==false))
+        {   
+            c = new Circle (x + 15, y + 15, 20, Color.white);
+            c.draw(page);  
+        }  }
+    } 	
+}//close checker class
+
+//*******************************************************
+//Shapes Interface
+interface Shapes
+{
+	public void SetX(int newX);
+	public void SetY(int newY);
+	public int GetX();
+	public int GetY();
+}// close interface Shapes
+
+
+//*******************************************************
+//Class that represents a square on the board
+//Each square has an x/y location, a size and some other variable to be determined by you
+class Square 
+{
+
+ private int x, y = 0;  
+ private Color c;
+ private boolean occupied;
+
+ public Square (int x, int y, Color c)
+ {
+   this.x = x;
+   this.y = y;
+   this.c = c;
+   occupied = false;
+ }
+
+ public void setX (int x)
+ {
+   x = this.x;
+ }
+
+ public int getX ()
+ {
+   return x;
+ }
+
+ public void setY (int y)
+ {
+   y= this.y;
+ }
+
+ public int getY ()
+ {
+   return y;
+ }
+
+ public void setColor (Color c)
+ {
+   c = this.c;
+ }
+
+ public Color getColor ()
+ {
+   return c;
+ }
+
+ public void setOccupy (boolean occupied)
+ {
+   this.occupied = occupied;
+ }
+
+ public boolean getOccupy ()
+ {
+   return occupied;
+ }
+
+ public String toString()
+ {
+   return ("X coordinate: " + x + "\nY coordinate:" + y + "\nSquare color: " + c);
+ }
+
+public void draw (Graphics page)
+    {
+      page.setColor(c);
+      page.fillRect(x, y, 50, 50);    
+    } 
+}//Close square class
+
+
+//***********************************************************************
+//Class to represent a checker - both black and white on the checkerboard
+class Circle
+{
+
+
+   private int x,y;
+   private int diameter;
+   private Color c;
+
+   public Circle (int x, int y, int diameter, Color c)
+   {
+      this.x = x;
+      this.y = y;
+      this.diameter = diameter;
+      this.c = c;
+   }
+
+
+   public void setX (int x)
+   {
+      x = this.x;
+   }
+
+    public int getX ()
+    {
+      return x;
+    }
+
+    public void setY (int y)
+    {
+      y= this.y;
+    }
+
+    public int getY ()
+    {
+      return y;
+    }
+
+    public void setColor (Color c)
+    {
+      c = this.c;
+    }
+
+    public Color getCColor ()
+    {
+      return c;
+    }
+
+    public void setDiameter (int x)
+    {
+      diameter = x;
+    }
+
+
+public void draw (Graphics page)
+{
+   page.setColor(c);
+   page.fillOval(x, y, diameter, diameter);
+}
+}
