@@ -1,0 +1,63 @@
+public class LinkedListTest
+{
+public static void main(String args[])
+   {
+     	String B = "B";
+		String E = "E";
+		String J = "J";
+		
+		LinkedList<String> list = new LinkedList<String>(); // creates list
+			  
+		// inserts B into the list
+		list.insertFirst(B);
+		System.out.println("This is (list) with B: ");
+		System.out.println(list);
+		System.out.println();
+		
+		// inserts E onto the end of the list
+		list.insertTail(E);
+		System.out.println("This is (list) with E: ");
+		System.out.println(list);
+		System.out.println();
+   	  	
+		// inserts J on the end
+		list.insert(E, J);
+		System.out.println("This is (list) with J at the end: ");
+		System.out.println(list);
+		System.out.println();
+	
+		// inserts  a new node after E
+		list.insert(E, "F");
+		System.out.println("This is (list) with F inserted after E: ");
+		System.out.println(list);
+		System.out.println();
+		// print out the list - 
+      
+		// deletes J
+		list.remove(J);
+		System.out.println("This is (list) after J is removed: ");
+		System.out.println(list);
+		System.out.println();
+		// print out the list
+	 
+	 
+    	// inserts J back into the list on the tail
+		list.insertTail(J);
+		System.out.println("This is (list) with J inserted at the end: ");
+		System.out.println(list);
+		System.out.println();
+		// print out the list
+     
+	  	// inserts A at the front
+		list.insertFirst("A");
+		System.out.println("This is (list) with A at the front: ");
+		System.out.println(list);
+		System.out.println();
+		// print out the list
+      
+ 	  
+   }
+}
+
+
+
