@@ -1,0 +1,564 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Scanner;
+
+import javax.swing.*;
+
+
+public class TabbedPane extends JFrame {
+
+	String response = ""; // variable for find celeb results
+	String gender1; // constructor variable
+
+	ImageIcon kim, w1, a1, d1, ins, f1; 
+
+	private JTextField tf1, tf2, tf3, tf4;
+	private Font pf;
+	private Font bf;
+	private Font itf;
+	
+
+	private JTextArea outputArea2, instructions2, i1, i2, i3, i4, result;
+	private JLabel instruction, add, find, delete, ilabel, l1, l2, l3, l4;
+
+	private JTextField fNameField; 
+	private JTextField lNameField;
+	private JTextField phoneField; 
+	private JTextField hobbyField;
+	private JTextField ageField;
+
+	// panels for each of the tabs
+	JPanel firstPanel = new JPanel();
+	JPanel secondPanel = new JPanel();
+	JPanel thirdPanel = new JPanel();
+	JPanel fourthPanel = new JPanel(new BorderLayout());
+	JPanel fifthPanel = new JPanel();
+	JPanel sixthPanel = new JPanel();
+
+	// list to show celebrities in system
+	private JList jList, jList2;
+	private DefaultListModel listModel;
+	private ArrayList<Client> List = new ArrayList<Client>();
+	private String filename ="Client.dat";
+
+	// delete tab output
+	JTextField output3;
+
+	// Combo Boxes
+	JComboBox genderBox, statusBox;
+
+	// Buttons
+	JButton addButton, deleteButton, findButton, resetButton;
+
+	JTabbedPane tabbedPane = new JTabbedPane();
+
+	private ActionHandler action;  // is the object that implements ActionListener and contains the actionPerformed method
+
+	JTextArea outputArea, instructions;
+
+	/**
+	 * constructor
+	 */
+	public TabbedPane() 
+	{		
+		listModel = new DefaultListModel();
+		jList = new JList(listModel); // this allows us access to a vector
+		jList2 = new JList(listModel);
+
+		// allows only one item to be selected at a time
+		jList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);	
+		jList.getSelectedIndex();// make initial screen empty
+
+		// puts the JList in a scrollpane for when Clients cannot be seen in the JList
+		output3 = new JTextField();
+
+		output3.setBorder(
+				BorderFactory.createCompoundBorder(
+						BorderFactory.createCompoundBorder(
+								BorderFactory.createLineBorder(Color.orange),
+								BorderFactory.createLoweredBevelBorder()),
+								BorderFactory.createCompoundBorder(
+										BorderFactory.createLineBorder(Color.black),
+										BorderFactory.createLoweredBevelBorder())));
+
+		BuildService();
+
+		action = new ActionHandler();
+		// sets font
+		tabbedPane.setFont(new Font("Helvetica", Font.PLAIN, 12));
+
+		// sets location of tabs
+		tabbedPane.setTabPlacement(JTabbedPane.LEFT);
+		tabbedPane.setBackground(Color.yellow);
+
+		//**********************************************************
+		//  add info tab
+		//**********************************************************
+		// array of different celeb types
+		String[] status = {"Actor/Actress", "Athlete", "Singer/Rapper", "Politician", "(TV)Personality", 
+		"Other"};
+
+		// text fields for add tab
+		fNameField = new JTextField(10);
+		lNameField = new JTextField(10);
+		phoneField = new JTextField(10);
+		hobbyField = new JTextField(10);
+		ageField = new JTextField(10);
+
+		statusBox = new JComboBox();
+		statusBox.addItem("Actor/Actress");
+		statusBox.addItem("Athlete");
+		statusBox.addItem("Singer/Rapper");
+		statusBox.addItem("Politician");
+		statusBox.addItem("(TV)Personality");
+		statusBox.addItem("Other");
+		statusBox.addActionListener(action);
+
+		genderBox = new JComboBox();
+		genderBox.addItem("Male");
+		genderBox.addItem("Female");
+		genderBox.addActionListener(action);
+
+
+		String[] labels = {"Gender:", "Celeb Type:", "First Name:", "Last Name:", "Phone Number:",
+				"Hobbie:", "Age:"};
+		int numPairs = labels.length;
+		// creates panel with labels and text fields/combo boxes
+		JPanel labelPanel = new JPanel(new SpringLayout());
+		labelPanel.setBackground(Color.red);
+
+		// connects label to corresponding text field
+		JLabel fNameLabel = new JLabel(labels[2], JLabel.TRAILING);
+		labelPanel.add(fNameLabel);
+		fNameLabel.setLabelFor(fNameField);
+		labelPanel.add(fNameField);
+
+		JLabel lNameLabel = new JLabel(labels[3], JLabel.TRAILING);
+		labelPanel.add(lNameLabel);
+		lNameLabel.setLabelFor(lNameField);
+		labelPanel.add(lNameField);
+
+		JLabel ageLabel = new JLabel(labels[6], JLabel.TRAILING);
+		labelPanel.add(ageLabel);
+		ageLabel.setLabelFor(ageField);
+		labelPanel.add(ageField);
+
+		JLabel phoneLabel = new JLabel(labels[4], JLabel.TRAILING);
+		labelPanel.add(phoneLabel);
+		phoneLabel.setLabelFor(phoneField);
+		labelPanel.add(phoneField);
+
+		JLabel hobbyLabel = new JLabel(labels[5], JLabel.TRAILING);
+		labelPanel.add(hobbyLabel);
+		hobbyLabel.setLabelFor(hobbyField);
+		labelPanel.add(hobbyField);
+
+		JLabel genderLabel = new JLabel(labels[0], JLabel.TRAILING);
+		labelPanel.add(genderLabel);
+		genderLabel.setLabelFor(genderBox);
+		labelPanel.add(genderBox);
+
+		JLabel statusLabel = new JLabel(labels[1], JLabel.TRAILING);
+		labelPanel.add(statusLabel);
+		statusLabel.setLabelFor(statusBox);
+		labelPanel.add(statusBox);
+
+		// makes the spring layout visible
+		SpringUtilities.makeCompactGrid(labelPanel, numPairs, 2, 6, 6, 6, 6);
+
+		// creates buttons
+		addButton = new JButton("Add");
+
+		addButton.addActionListener(action);
+
+		// creates button panel
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.add(addButton);
+
+		outputArea = new JTextArea(0, 5);
+		outputArea.setEditable(false);
+
+		//****************************************************************************
+		//  declares and instantiates all images used in welcome and instructions tab
+		//****************************************************************************
+		Image image2;
+		Image image3;
+		Image image4;
+		Image image5;
+
+		kim = new ImageIcon(getClass().getResource("Kim.jpg"));
+		w1 = new ImageIcon(getClass().getResource("w1.jpg"));
+		a1 = new ImageIcon(getClass().getResource("add.jpg"));
+		d1 = new ImageIcon(getClass().getResource("delete.jpg"));
+		ins = new ImageIcon(getClass().getResource("ins.jpg"));
+		f1 = new ImageIcon(getClass().getResource("find.jpg"));
+
+		image2 = ins.getImage(); // get an image object from it
+		image2 = image2.getScaledInstance(100,75, Image.SCALE_SMOOTH);// reduce its size
+		ins = new ImageIcon(image2);
+		l1 = new JLabel(ins);
+
+		image3 = a1.getImage(); // get an image object from it
+		image3 = image3.getScaledInstance(100,75, Image.SCALE_SMOOTH);// reduce its size
+		a1 = new ImageIcon(image3);
+		l2 = new JLabel(a1);
+
+		image4 = f1.getImage(); // get an image object from it
+		image4 = image4.getScaledInstance(100,75, Image.SCALE_SMOOTH);// reduce its size
+		f1 = new ImageIcon(image4);
+		l3 = new JLabel(f1);
+
+		image5 = d1.getImage(); // get an image object from it
+		image5 = image5.getScaledInstance(100,75, Image.SCALE_SMOOTH);// reduce its size
+		d1 = new ImageIcon(image5);
+		l4 = new JLabel(d1);
+
+		i1 = new JTextArea("Use the tabs on the left to navigate", 0, 20);
+		i1.setEditable(false);
+		i1.setBackground(Color.cyan);
+
+		i2 = new JTextArea("Click ADD to add clients", 0, 25);
+		i2.setEditable(false);
+		i2.setBackground(Color.red);
+
+		i3 = new JTextArea("Click FIND to find clients", 0, 25);
+		i3.setEditable(false);
+		i3.setBackground(Color.LIGHT_GRAY);
+
+		i4 = new JTextArea("Click DELETE to delete clients", 0, 25);
+		i4.setEditable(false);
+		i4.setBackground(Color.LIGHT_GRAY);
+
+		//***************************************************************
+		// instructions tab
+		//***************************************************************
+		instruction = new JLabel("General Instructions");
+		add = new JLabel("How To Add");
+		find = new JLabel("How To Find");
+		delete = new JLabel("How to Delete"); 
+
+		JPanel InstructionPanel = new JPanel();
+		InstructionPanel.setLayout(new GridLayout(4, 2));
+		InstructionPanel.setBackground(Color.white);
+		
+		secondPanel.setBackground(Color.white);
+		secondPanel.add(InstructionPanel);
+
+		InstructionPanel.add(l1);
+		InstructionPanel.add(i1); 
+		InstructionPanel.add(l2);
+		InstructionPanel.add(i2);
+		InstructionPanel.add(l3);
+		InstructionPanel.add(i3);
+		InstructionPanel.add(l4); 
+		InstructionPanel.add(i4);
+
+		//***********************************************************
+		// find celeb tab
+		//***********************************************************
+		findButton = new JButton("FIND");
+		findButton.setFont(new Font("Helvetica", Font.BOLD, 72));
+		findButton.setMargin(new Insets(50, 50, 50, 50));
+		findButton.addActionListener(action);
+
+		outputArea2 = new JTextArea(10, 10);
+		outputArea2.setEditable(false);
+
+		//**************************************************************
+		// welcome tab
+		//**************************************************************
+		Image image;
+		Image image1;
+
+		image = kim.getImage(); // get an image object from it
+		image = image.getScaledInstance(200,175, Image.SCALE_SMOOTH);// reduce its size
+		kim = new ImageIcon(image);
+		ilabel = new JLabel(kim);
+
+		image1 = w1.getImage(); // get an image object from it
+		image1 = image1.getScaledInstance(350, 150, Image.SCALE_SMOOTH);// reduce its size
+		w1 = new ImageIcon(image1);
+		JLabel ilabel1 = new JLabel(w1);
+
+		JPanel WelcomePanel = new JPanel();
+		WelcomePanel.setBackground(Color.red);
+		WelcomePanel.add(ilabel1);
+		WelcomePanel.add(ilabel);
+
+		WelcomePanel.setLayout(new GridLayout(2, 0));
+		firstPanel.add(WelcomePanel);
+		firstPanel.setBackground(Color.red);
+
+		//****************************************************************
+		// celebrity panel
+		//****************************************************************
+		JScrollPane celebs = new JScrollPane(jList2); // separate jlist for celeb tab
+		celebs.setBorder(
+				BorderFactory.createCompoundBorder(
+						BorderFactory.createCompoundBorder(
+								BorderFactory.createLineBorder(Color.red),
+								BorderFactory.createLoweredBevelBorder()),
+								BorderFactory.createCompoundBorder(
+										BorderFactory.createLineBorder(Color.black),
+										BorderFactory.createLoweredBevelBorder())));
+		thirdPanel.setLayout(new BorderLayout());
+		thirdPanel.setBackground(Color.red);
+		thirdPanel.add(celebs, BorderLayout.CENTER);
+
+		//*******************************************************************
+		// delete tab
+		//*******************************************************************
+		JScrollPane listScrollPanel = new JScrollPane(jList);
+		// sets up a compound border for the Jlist object- this is the fanciest one I could find 
+		listScrollPanel.setBorder(
+				BorderFactory.createCompoundBorder(
+						BorderFactory.createCompoundBorder(
+								BorderFactory.createLineBorder(Color.black),
+								BorderFactory.createLoweredBevelBorder()),
+								BorderFactory.createCompoundBorder(
+										BorderFactory.createLineBorder(Color.orange),
+										BorderFactory.createLoweredBevelBorder())));
+		sixthPanel.setLayout(new BoxLayout(sixthPanel, BoxLayout.Y_AXIS));
+		deleteButton = new JButton("Delete");
+		deleteButton.setAlignmentX(CENTER_ALIGNMENT);
+
+		deleteButton.addActionListener(action);
+		
+		// adds all information to various tab panes
+		sixthPanel.add(listScrollPanel);
+		sixthPanel.add(deleteButton);
+		sixthPanel.add(output3);
+
+		fifthPanel.setLayout(new BorderLayout());
+
+		fifthPanel.add(outputArea2, BorderLayout.SOUTH);
+		fifthPanel.add(findButton, BorderLayout.NORTH);
+
+		fourthPanel.setLayout(new BoxLayout(fourthPanel, BoxLayout.Y_AXIS));
+		fourthPanel.add(labelPanel);
+		fourthPanel.add(buttonPanel);
+		fourthPanel.add(outputArea);
+
+		// adding panels and labels to tabs
+		tabbedPane.add("Welcome", firstPanel);
+		tabbedPane.add("Instructions", secondPanel);
+		tabbedPane.add("Celebrites", thirdPanel);
+		tabbedPane.add("Add Info", fourthPanel);
+		tabbedPane.add("Find Celeb", fifthPanel);
+		tabbedPane.add("Delete Info", sixthPanel);
+		add(tabbedPane);
+	}
+
+	/**
+	 * scans from jList of clients and stores
+	 * information in variables
+	 */
+	public  void BuildService()
+	{
+		try {
+			// creates variables that hold information read from file
+			String lastName  = " ", firstName  = " ", status = " ", phone  = " ", hobby  = "", gender = "";
+			int age;
+			String line;
+			Scanner scan = new Scanner(new File("Client.dat")); // creates an iterator to read in clients from a file "Client.dat"  
+			Scanner linescan;  // creates another iterator to break up the line read in
+
+
+			while(scan.hasNext()) // reads in lines from a file until there are no more (no hasNext())
+			{
+				line = scan.nextLine();//reads in one line from the file
+				System.out.println(line); // for debugging
+
+				linescan = new Scanner(line); // creates a scanner object  - an iterator -
+
+				if(linescan.hasNext())// the line read in has more fields/tokens/ - lastname, firstname etc.
+				{
+
+					// uses next and nextInt method to tokenize the line and store the input in variables lastname, hobby etc.
+					firstName = linescan.next(); // reads in firstname
+					lastName = linescan.next(); // reads in lastname
+					age = linescan.nextInt(); // get the age
+					phone = linescan.next(); // reads in phone
+					hobby = linescan.next(); // reads in hobby
+					gender = linescan.next(); // reads in sex
+					status = linescan.next(); // reads in status
+
+					// creates a client with input values
+					Client client = new Client (firstName, lastName, age, phone, hobby, gender, status);
+
+					// adds the newly created Client  to the JList(listModel)
+					listModel.addElement(client); 
+					List.add(client); // adds it to the ArrayList
+				} // close if
+			} 	// close while
+		} // close try
+		catch(FileNotFoundException e)
+		{
+			System.out.println("File Not Found: ") ; // !!FILE_NOT_FOUND
+		}
+		catch(IOException e)
+		{
+			System.out.println("IOException " + e.getMessage() ); // !!READ_ONLY!!
+		}
+	}// close method
+
+
+	/***********************************************************************************************
+	 *class ActionHandler handles events from the buttons – it is nested inside DatingService
+	 *The actionPerformed method is called when the buttons are pushed	 
+	 ***********************************************************************************************/
+	/**
+	 * Handeles the events from the buttons
+	 * @author Michael Ellenwood && Eon Mattis
+	 */
+	class ActionHandler implements ActionListener
+	{
+		/**
+		 * identifies which button is clicked and 
+		 * performs a function
+		 * @param e (ActionEvent)
+		 */
+		public void actionPerformed(ActionEvent e) // a button was pressed 
+		{
+			// variables to hold firstname, lastname, etc.
+			String lastName  = " ", firstName  = " ", status = " ", phone  = " ", hobby  = "", gender = "";
+			int age;
+			String age2;
+
+			// get "R" or "S" for a regular or a senior client
+			// or "M" or "F" for a regular or senior client
+			if(e.getSource() == statusBox) 
+				status = (String)statusBox.getSelectedItem();
+			if(e.getSource() == genderBox)
+				gender = (String)genderBox.getSelectedItem();
+
+			// checks to see if the ADD button was pressed
+			if (e.getActionCommand().equals("Add")) // add button pressed
+			{    
+				//uses method getText() to get  the data in the JTextfields e.g
+				firstName = fNameField.getText(); // gets firstName from the firstField textfield   
+				lastName = lNameField.getText(); // gets lastName from the secondField textfield
+				phone = phoneField.getText(); // gets phone from the thirdField textfield
+				hobby = hobbyField.getText(); // gets hobby from the fourthField textfield
+				age = Integer.parseInt(ageField.getText()); // gets age from the fifthField textfield 
+				gender = (String)genderBox.getSelectedItem(); // gets gender from combo box
+				status = (String)statusBox.getSelectedItem(); // gets status from combo box
+				Client client = new Client (firstName, lastName, age, phone, hobby, gender, status);
+
+				listModel.addElement(client);
+				List.add(client); // add client to ArrayList
+				outputArea.append(client.toString());
+				System.out.println(client.toString());
+
+
+
+				fNameField.setText(""); // CLEAR ALL THE TEXTFIELDS
+				lNameField.setText("");
+				phoneField.setText("");
+				hobbyField.setText("");
+				ageField.setText("");
+			} // close add
+
+
+			if (e.getActionCommand().equals("Delete")) // if the delete button was pressed
+			{
+				Client temp = (Client)jList.getSelectedValue();  // method returns an  client object  
+
+				// Removes client from the JList and ArrayList
+				listModel.removeElement(temp); 
+				List.remove(temp);
+
+				output3.setText("You have been successfully deleted from the system!");
+			} 	// close if delete
+
+
+			if (e.getActionCommand().equals("FIND")) // if find is pressed
+			{
+				String choice = JOptionPane.showInputDialog(null, "Find by Hobby, Age, or Celeb Status - Enter H, A, or S", "Input H, A, or S  ", JOptionPane.PLAIN_MESSAGE );
+
+				Iterator<Client> iter = List.iterator(); // this returns an iterator to traverse the array
+
+				while (!choice.equals("H") && !choice.equals("A") && !choice.equals("S"))
+				{
+					JOptionPane.showMessageDialog (null,  "Please Enter A, H, or S",   
+							"Attention", JOptionPane.PLAIN_MESSAGE );
+					choice = JOptionPane.showInputDialog(null, "Find by Hobby, Age, or Celeb Status - Enter H, A, or S", "Input H, A, or S  ", JOptionPane.PLAIN_MESSAGE );
+				}
+
+				if (choice.equals("H")) // if user chooses hobby
+				{
+					String hobby1 = JOptionPane.showInputDialog(null, "Enter Hobby: ", JOptionPane.PLAIN_MESSAGE); 
+					// prompts user to enter hobby
+
+					while (iter.hasNext()) 
+					{
+						Client client =  iter.next();// steps through the ArrayList client by Client
+						hobby = client.getHobby();
+
+						if (hobby.equals(hobby1)) // hobby1 represents the hobby that the user input
+							response  += client.toString() + "\n";                 
+					} // close while
+					System.out.println(response); // prints client matches
+					outputArea2.append(response); 
+				}
+				if (choice.equals("S"))
+				{
+					String status1 = JOptionPane.showInputDialog(null, "Enter Status (As Shown in Combo Box): ", JOptionPane.PLAIN_MESSAGE);
+					while (iter.hasNext())
+					{
+						Client client = iter.next();
+						status = client.getStatus();
+						
+						if (status.equals(status1))
+							response += client.toString() + "\n";
+					}
+					outputArea2.append(response);
+				}				
+				if  (choice.equals("A"))
+				{
+					age2 = JOptionPane.showInputDialog(null, "Enter Age", JOptionPane.PLAIN_MESSAGE);
+					age = Integer.parseInt(age2);
+					while (iter.hasNext())
+					{
+						Client client = iter.next();// steps through the ArrayList client by Client
+						// compares the ages of each client with the age the user entered.
+
+						int tooOld = client.getAge() + 5;
+						int tooYoung = client.getAge() - 5;
+
+						if (age <= tooOld && age >= tooYoung)
+							response += client.toString() + "\n";
+					} // close while
+
+					System.out.println(response);
+					outputArea2.append(response);
+				} // close if
+			}
+		}// close find
+
+	} // close actionperformed
+	//close ActionHandler
+
+	/**
+	 * main method
+	 * @param args (String[])
+	 */
+	public static void main(String[] args) {
+		TabbedPane tb = new TabbedPane();
+		tb.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		tb.setSize(533, 400);
+		tb.setVisible(true);
+	}
+}
