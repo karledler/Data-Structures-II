@@ -1,0 +1,141 @@
+//program to set up a client database using a List class
+   import java.util.StringTokenizer;
+   import java.io.*;
+   import java.text.*;
+   import java.util.*;
+   import java.awt.*;
+   import java.awt.event.*;
+   import javax.swing.*;
+	import java.util.ArrayList;
+	import java.util.Iterator;
+
+public class AuctionGUI extends JFrame
+{	
+
+			 // Declare all the labels for TextFields and ComboBoxes
+		 private JLabel bidStackLabel, currentBidLabel, currentMaxLabel, newBidLabel, newMaxLabel;
+
+		 // Declare TextFields
+		 private JTextField bidStackField, currentBidField, currentMaxField, newBidField, newMaxField;
+       
+       private ControlsPanel controls; // class that process the bids and contains the buttons
+       private BidderPanel   BP;  // class that we will draw the images on
+             
+
+
+/********************************************************************
+* Auction::AuctionGUI()
+******************************************************************/
+public AuctionGUI()
+{
+  super("Auction"); // Set title
+
+
+		 // create the JTextfields- example below
+		 bidStackField = new JTextField(16);
+		 currentBidField = new JTextField(16);
+		 currentMaxField = new JTextField(13);
+		 newBidField = new JTextField(25);
+       newMaxField = new JTextField(17);
+       
+       bidStackField.setEditable(false);
+       currentBidField.setEditable(false);
+       currentMaxField.setEditable(false);
+		          
+         
+         // create a  label for each of the JTextFields and JComboBoxes
+	     bidStackLabel = new JLabel("Bidders in Stack"); // this label is for the JButton ADD
+	     currentBidLabel = new JLabel("Current Bid");
+	     currentMaxLabel = new JLabel("Current Max Bid");
+	     newBidLabel = new JLabel("New Bid");
+	     newMaxLabel = new JLabel("New Max Bid");
+        
+        // now create an object of the BidPanel  class  - we will draw the images in there
+        BP = new BidderPanel();
+       // now create an  object of the ControlPanel class 
+       controls = new ControlsPanel(bidStackField, currentBidField, currentMaxField, newBidField, newMaxField, BP, this);
+		
+
+	     // create a panel for the client fields
+	     JPanel topPanel = new JPanel();
+	     topPanel.setBorder(BorderFactory.createLoweredBevelBorder());
+        topPanel.setLayout(new GridLayout(5,2,0,3));
+	     topPanel.add(bidStackLabel);
+        topPanel.add(bidStackField);
+        topPanel.add(currentBidLabel);
+	     topPanel.add(currentBidField);
+        topPanel.add(newBidLabel);
+	     topPanel.add(newBidField);
+        topPanel.add(newMaxLabel);
+	     topPanel.add(newMaxField);
+        topPanel.add(currentMaxLabel);
+        topPanel.add(currentMaxField);
+        
+	     
+	  
+         // get the ContentPane and add the various panels
+	 
+	   
+        Container contentPane = getContentPane();
+        contentPane.add(topPanel,BorderLayout.NORTH); // panel with textfields
+        contentPane.add(controls,BorderLayout.SOUTH); // ControlPanel with the Buttons
+        contentPane.add(BP,BorderLayout.CENTER);// panel for images        
+        
+        setBidders("0");
+        setCurrentBid("0");
+        setNewMax("0");
+        setCurrentMax("0");
+       
+
+    }  // close constructor
+    
+       // setter and getters - 
+     public String getBidders()
+      {
+      return bidStackField.getText();
+      }
+
+     public String returnNewBid()
+      {
+        return newBidField.getText();
+      }
+         
+     public String returnNewMax()
+      {
+        return newMaxField.getText();
+      }
+     
+     public String returnCurrentMax()
+     {
+       return currentMaxField.getText();
+     }
+     
+     public String returnCurrentBid()
+     {
+       return currentBidField.getText();
+     }
+
+     public void setNewBid(String amount)
+     {
+      newBidField.setText(amount);
+     }
+     
+     public void setNewMax(String amount)
+     {
+      newMaxField.setText(amount);
+     }
+     
+     public void setCurrentBid(String amount)
+     {
+      currentBidField.setText(amount);
+     }
+     
+     public void setCurrentMax(String amount)
+     {
+      currentMaxField.setText(amount);
+     }
+     public void setBidders(String amount)
+     {
+      bidStackField.setText(amount);  
+     }
+  }
