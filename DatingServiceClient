@@ -1,0 +1,169 @@
+//********************************************************************
+////   THERE IS MORE CODE TO DO,  YOU NEED TO DO ANOTHER CONSTRUCTOR AND SETTERS AND GETTERS etc  AND DO THE EQUALS METHOD.  IT IS SIMILAR TO COMPARETO BUT
+// IT DETERMINES IF THE OBJECTS CONTAIN THE SAME DATA
+// Client.java       
+//
+// Responsible for creating objects that represent a  client.
+//********************************************************************
+
+public class Client implements Comparable<Client>
+{
+	protected static int count = 0;
+  protected String lastname, firstname, sex, phone, hobby;// put in other variables
+  protected int age;
+
+// PUT IN INSTANCE VARIABLES - SEE SPECS ON PROJECT ON MY WEB SITE FOR DETAILS
+// INCLUDES FIRSTNAME, LASTNAME , HOBBY AGE ETC  . NO AGE VARIABLE FOR SENIORS
+	
+//constructs client with all variables and increments countER	
+public Client(String lastname, String firstname, String sex, int age,  String phone, String hobby)
+	{
+		// E.G. ASSIGN VALUES TO INSTANCE VARIABLES.E.G. this.lastname = lastname;
+      this.lastname = lastname;
+      this.firstname = firstname;
+      this.sex = sex;
+      this.age = age;
+      this.phone = phone;
+      this.hobby = hobby;
+		count++;
+	}
+	
+		//CREATE ANOTHER CONSTRUCTOR HERE
+
+//this constructor constructs client with  lastname, firstname, etc, BUT no age variable and increments count
+public Client(String lastname, String firstname, String sex,  String phone, String hobby)
+	{
+      this.lastname = lastname;
+      this.firstname = firstname;
+      this.sex = sex;
+      this.phone = phone;
+      this.hobby = hobby;
+		count++;
+	}
+
+	
+// put in setters and getters	
+	
+/** Description -compares clients first and lastnames lexically for placement in the database
+ I am giving this method as a template for future projects compareTO methods */ 
+	 /* 
+	 * @param other refers to another Client
+	 * @param result - possible values
+	 * 0 if this client and other have same names, 1, if other is greater, -1 if less than
+	 * @return 0, 1, -1
+	 */
+
+	public int compareTo(Client other)
+	{
+	int result;
+	
+	if(lastname.equals(other.lastname))
+		result = firstname.compareTo(((Client)other).firstname);
+	else result = lastname.compareTo(((Client)other).lastname);
+	
+	return result;
+	}
+	
+	//this method determines if the first and lastname of one object other is the
+	//same as the last and firstname of the current object
+	public boolean equals(Object other)
+	{
+	boolean result = false;
+	// CODE HERE  - “OTHER” MUST BE CAST TO TYPE  CLIENT E.G
+   if(lastname.equals(((Client)other).lastname))
+      result=lastname.equals(((Client)other).lastname);
+   
+   // before doing the comparison
+   
+   return true;  // THIS IS JUST TO GET THIS CODE TO COMPILE , may return false if no match
+	}
+	
+	
+	
+// DO SETTERS AND GETTERS FOR THE OTHER INSTANCE VARIABLES*******************
+public void setlastname (String lastname)
+ {
+   lastname = this.lastname;
+ }
+
+ public String getlastname ()
+ {
+   return lastname;
+ }
+
+ public void setfirstname (String firstname)
+ {
+   firstname= this.firstname;
+ }
+
+ public String getfirstname ()
+ {
+   return firstname;
+ }
+ 
+ public void setsex (String sex)
+ {
+   sex= this.sex;
+ }
+
+ public String getsex ()
+ {
+   return sex;
+ }
+ 
+  public void setphone (String phone)
+ {
+   phone= this.phone;
+ }
+
+ public String getphone ()
+ {
+   return phone;
+ }
+ 
+ public void sethobby (String hobby)
+ {
+   hobby= this.hobby;
+ }
+
+ public String gethobby ()
+ {
+   return hobby;
+ }
+
+ public void setage (int age)
+ {
+   age= this.age;
+ }
+
+ public int getage ()
+ {
+   return age;
+ }
+
+	
+
+//returns a string representation of the client object. I am giving this code as a template for all //other toString's you will write this term.
+  public String toString()
+	{
+	return firstname + " " + lastname + "  " + sex + " " + phone + "  " + hobby + " " + age;
+	}
+   
+} //class client
+
+
+class SeniorClient extends Client
+{
+   // create a constructor with parameters for all the instance variables in Client, except age
+   public SeniorClient (String lastname, String firstname, String sex,  String phone, String hobby) 
+      {
+         super(lastname, firstname, sex, phone, hobby);
+      }
+   
+   
+       public String toString ()  
+      {
+         // prints out all but the age variable      // see parent class for template
+         return firstname + " " + lastname + "  " + sex + " " + phone + "  " + hobby;
+      }  
+}
